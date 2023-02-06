@@ -148,7 +148,6 @@ const char* LogReader::GetChunk(const char * buf, std::string & data, CHUNK_TYPE
     type = static_cast<CHUNK_TYPE>(buf[6]);
     const uint32_t data_len = a | (b << 8);
     data.append(buf + kHeaderSize, data_len);
-    // std::cout << "data_len " << data_len << std::endl;
     return buf + kHeaderSize + data_len;
 }
 
@@ -240,7 +239,6 @@ int main(int argc, char ** argv)
         return 0;
     }
 
-    int count = 0;
     while (reader.Good() && reader.HasNext())
     {
         std::string record;
@@ -261,7 +259,7 @@ int main(int argc, char ** argv)
             read_size += sizeof(uint32_t);
 
             // parse entry
-            for (int i = 0; i < entry_count; i++)
+            for (size_t i = 0; i < entry_count; i++)
             {
                 RECORD_TYPE r_type = static_cast<RECORD_TYPE>(start[read_size]);
                 read_size += 1;
@@ -281,7 +279,7 @@ int main(int argc, char ** argv)
                     val = std::string(start + read_size, val_len);
                     read_size += val_len;
 
-                    printf("Put(%s, %s)\n", key.c_str(), val.c_str());
+                    printf("Put(%s, %s) seq_num %zu\n", key.c_str(), val.c_str(), seq_num++);
                 }
                 else if (r_type == RECORD_TYPE::kTypeDeletion)
                 {
@@ -289,7 +287,7 @@ int main(int argc, char ** argv)
                     read_size += mov;
                     key = std::string(start + read_size, key_len);
                     read_size += key_len;
-                    printf("Delete(%s)\n", key.c_str());
+                    printf("Delete(%s) seq_num %zu\n", key.c_str(), seq_num++);
                 }
                 else
                 {
